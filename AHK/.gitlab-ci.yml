@@ -1,0 +1,17 @@
+image: docker:latest
+
+variables:
+  DOCKER_TLS_CERTDIR: ""
+
+stages:
+  - deployAHK
+
+deployAHK:
+  stage: deployAHK
+  script:
+    - cd ../AHK || true
+    - echo "$CONFIG_YAML" > config.yaml
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_python_container
+    - chmod 600 ~/.ssh/id_python_container
+    - ./deployAHK.sh

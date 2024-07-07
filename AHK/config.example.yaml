@@ -1,0 +1,9 @@
+servers:
+  - id: "1"
+    user: "hostname"
+    host: "ip"
+  - id: "2"
+    user: "hostname"
+    host: "ip"
+bungieID: "1111111111111111111"
+refreshCode: "???"

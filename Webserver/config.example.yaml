@@ -1,0 +1,17 @@
+psexec: '"C:\\Portable Programs\\PSTools\\PsExec.exe" -s -d -i 1'
+autohotkey: '"C:\\Program Files\\AutoHotkey\\AutoHotkey.exe"'
+servers:
+  - id: "1"
+    user: "your_user"
+    host: "your_host"
+  - id: "2"
+    user: "your_user"
+    host: "your_host"
+scripts:
+  gotoexp: "path_to_gotoexp_script"
+  startexp: "path_to_startexp_script"
+  # Add other scripts similarly
+docker:
+  repo_url: "your_repo_url"
+  port: your_port_number
+  container_tag: "your_container_tag"

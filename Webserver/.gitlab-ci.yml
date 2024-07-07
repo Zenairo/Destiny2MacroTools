@@ -1,0 +1,53 @@
+image: docker:latest
+
+services:
+  - name: docker:dind
+    command: ["--storage-driver=overlay2"]
+
+stages:
+  - build
+  - deploy
+  - live
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  CONFIG_FILE: config.yaml
+
+before_script:
+  - cd Webserver || true
+  - echo "$CONFIG_YAML" > config.yaml
+  - export REPO_URL=$(awk '/repo_url:/ {gsub(/["\r]/, ""); print $2}' "$CONFIG_FILE")
+  - export PORT=$(awk '/port:/ {gsub(/["\r]/, ""); print $2}' "$CONFIG_FILE")
+  - export CONTAINER_TAG=$(awk '/container_tag:/ {gsub(/["\r]/, ""); print $2}' "$CONFIG_FILE")
+
+build:
+  stage: build
+  script:
+    # Write SSH keys to files
+    - echo "$PYTHON_PRIVATE_KEY" > keys/id_python_container
+    - echo "$PYTHON_PUBLIC_KEY" > keys/id_python_container.pub
+    - chmod 600 keys/id_python_container
+    - chmod 644 keys/id_python_container.pub
+    # Build Docker image
+    - docker build -t $CI_REGISTRY_IMAGE:latest -f Dockerfile .
+    # Login and push the Docker image
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker push $CI_REGISTRY_IMAGE:latest
+
+deploy:
+  stage: deploy
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker pull $CI_REGISTRY_IMAGE:latest
+    - docker tag $CI_REGISTRY_IMAGE:latest $REPO_URL:$PORT/$CONTAINER_TAG
+    - docker push $REPO_URL:$PORT/$CONTAINER_TAG
+
+live:
+  stage: live
+  script:
+    - mkdir -p ~/.ssh
+    - echo "$REPO_PRIVATE_KEY" > ~/.ssh/nas_task_rsa
+    - chmod 600 ~/.ssh/nas_task_rsa
+    - echo -e "Host task_nas\n\tHostName $REPO_URL\n\tUser task\n\tPreferredAuthentications publickey\n\tIdentityFile ~/.ssh/nas_task_rsa" > ~/.ssh/config
+    - ssh -o StrictHostKeyChecking=no -t task_nas "sudo /volume1/docker/watchtower/start_watchtower.sh"

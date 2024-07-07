@@ -1,0 +1,46 @@
+{
+   "CapAdd" : null,
+   "CapDrop" : null,
+   "cmd" : "--label-enable --run-once --include-stopped",
+   "cpu_priority" : 0,
+   "enable_publish_all_ports" : false,
+   "enable_restart_policy" : false,
+   "enabled" : true,
+   "env_variables" : [
+      {
+         "key" : "PATH",
+         "value" : "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      }
+   ],
+   "exporting" : false,
+   "id" : "6767260ecb34bd022fc687bb34ff3047bf464d8d40275a335ce793981365ad6d",
+   "image" : "containrrr/watchtower",
+   "is_ddsm" : false,
+   "is_package" : false,
+   "links" : [],
+   "memory_limit" : 0,
+   "name" : "watchtower",
+   "network" : [
+      {
+         "driver" : "bridge",
+         "name" : "bridge"
+      }
+   ],
+   "network_mode" : "default",
+   "port_bindings" : [],
+   "privileged" : false,
+   "shortcut" : {
+      "enable_shortcut" : false,
+      "enable_status_page" : false,
+      "enable_web_page" : false,
+      "web_page_url" : ""
+   },
+   "use_host_network" : false,
+   "volume_bindings" : [
+      {
+         "host_volume_file" : "/docker/docker.sock",
+         "mount_point" : "/var/run/docker.sock",
+         "type" : "rw"
+      }
+   ]
+}
