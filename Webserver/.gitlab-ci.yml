@@ -14,16 +14,11 @@ variables:
   DOCKER_TLS_CERTDIR: ""
   CONFIG_FILE: config.yaml
 
-before_script:
-  - cd Webserver || true
-  - echo "$CONFIG_YAML" > config.yaml
-  - export REPO_URL=$(awk '/repo_url:/ {gsub(/["\r]/, ""); print $2}' "$CONFIG_FILE")
-  - export PORT=$(awk '/port:/ {gsub(/["\r]/, ""); print $2}' "$CONFIG_FILE")
-  - export CONTAINER_TAG=$(awk '/container_tag:/ {gsub(/["\r]/, ""); print $2}' "$CONFIG_FILE")
-
 build:
   stage: build
   script:
+    - cd Webserver || true
+    - echo "$CONFIG_YAML" > config.yaml
     # Write SSH keys to files
     - echo "$PYTHON_PRIVATE_KEY" > keys/id_python_container
     - echo "$PYTHON_PUBLIC_KEY" > keys/id_python_container.pub
@@ -35,9 +30,14 @@ build:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker push $CI_REGISTRY_IMAGE:latest
 
-deploy:
+deploy-webserver:
   stage: deploy
   script:
+    - cd Webserver || true
+    - echo "$CONFIG_YAML" > config.yaml
+    - export REPO_URL=$(awk '/repo_url:/ {gsub(/["\r]/, ""); print $2}' "$CONFIG_FILE")
+    - export PORT=$(awk '/port:/ {gsub(/["\r]/, ""); print $2}' "$CONFIG_FILE")
+    - export CONTAINER_TAG=$(awk '/container_tag:/ {gsub(/["\r]/, ""); print $2}' "$CONFIG_FILE")
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker pull $CI_REGISTRY_IMAGE:latest
     - docker tag $CI_REGISTRY_IMAGE:latest $REPO_URL:$PORT/$CONTAINER_TAG
@@ -46,6 +46,9 @@ deploy:
 live:
   stage: live
   script:
+    - cd Webserver || true
+    - echo "$CONFIG_YAML" > config.yaml
+    - export REPO_URL=$(awk '/repo_url:/ {gsub(/["\r]/, ""); print $2}' "$CONFIG_FILE")
     - mkdir -p ~/.ssh
     - echo "$REPO_PRIVATE_KEY" > ~/.ssh/nas_task_rsa
     - chmod 600 ~/.ssh/nas_task_rsa

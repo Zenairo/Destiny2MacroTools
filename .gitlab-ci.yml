@@ -1,9 +1,8 @@
 stages:
   - build
   - deploy
-  - deployAHK
   - live
 
 include:
-  - local: "Webserver/.gitlab-ci.yml"
   - local: "AHK/.gitlab-ci.yml"
+  - local: "Webserver/.gitlab-ci.yml"

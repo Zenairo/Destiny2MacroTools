@@ -4,14 +4,23 @@ variables:
   DOCKER_TLS_CERTDIR: ""
 
 stages:
-  - deployAHK
+  - deploy
 
-deployAHK:
-  stage: deployAHK
+deploy-ahk:
+  stage: deploy
   script:
-    - cd ../AHK || true
+    - cd AHK || true
     - echo "$CONFIG_YAML" > config.yaml
     - mkdir -p ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_python_container
+    - echo "$PYTHON_PRIVATE_KEY" > ~/.ssh/id_python_container
     - chmod 600 ~/.ssh/id_python_container
-    - ./deployAHK.sh
+    - |
+      awk '/user:/ { user=$2 } /host:/ { host=$2; gsub(/["\r]/, "", user); gsub(/["\r]/, "", host); print user, host }' $CONFIG_FILE | while IFS=" " read -r user host; do
+          echo "Attempting to connect to ${host}..."
+          if ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no -i ~/.ssh/id_python_container "${user}@${host}" 'exit'; then
+              echo "Successfully connected to ${host}. Copying files..."
+              scp -r -o StrictHostKeyChecking=no -i ~/.ssh/id_python_container ../AHK "${user}@${host}:/" || echo "Failed to copy AHK folder to ${user}@${host}"
+          else
+              echo "Host ${host} is not reachable"
+          fi
+      done
